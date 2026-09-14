@@ -12,12 +12,12 @@ As part of `Deliverable ⓵ Development deployment: JWT Pizza`, start up the app
 | Order pizza                                         | menu.tsx <br/> payment.tsx | \[GET\] /api/order/menu <br/> \[GET\] /api/franchise?page=0&limit=20&name=* <br/> \[GET\] /api/user/me <br/> \[POST\] /api/order | `SELECT * FROM menu` <br/> `SELECT id, name FROM franchise WHERE name LIKE ? LIMIT ${limit + 1} OFFSET ${offset}` <br/> `SELECT id, name FROM store WHERE franchiseId=?` <br/> `SELECT userId FROM auth WHERE token=?` <br/> `INSERT INTO dinerOrder (dinerId, franchiseId, storeId, date) VALUES (?, ?, ?, now())` <br/> `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?)`          |
 | Verify pizza                                        | delivery.tsx       | \[GET\] (PizzaFactory) /api/order/verify | none  |
 | View profile page                                   | dinerDashboard.tsx | \[GET\] /api/order | `SELECT id, franchiseId, storeId, date FROM dinerOrder WHERE dinerId=? LIMIT ${offset},${config.db.listPerPage}` <br/> `SELECT id, menuId, description, price FROM orderItem WHERE orderId=?` |
-| View franchise<br/>(as diner)                       | franchiseDashboard.tsx | \[GET\] /api/franchise/:userId (returns [] because not admin) <br/>| `SELECT objectId FROM userRole WHERE role='franchisee' AND userId=?` |
+| View franchise<br/>(as diner)                       | franchiseDashboard.tsx | \[GET\] /api/franchise/:userId (Shows why franchise because not admin) <br/>| `SELECT objectId FROM userRole WHERE role='franchisee' AND userId=?` <br/> `SELECT id, name FROM franchise WHERE id in (${franchiseIds.join(',')})` <br/> |
 | Logout                                              | logout.tsx         | \[DELETE\] /api/auth | `DELETE FROM auth WHERE token=?` |
 | View About page                                     | about.tsx          | none | none |
 | View History page                                   | history.tsx        | none | none |
 | Login as franchisee<br/>(f@jwt.com, pw: franchisee) | login.tsx          | \[PUT\] /api/auth | `SELECT * FROM user WHERE email=?` <br/> `SELECT * FROM userRole WHERE userId=?` |
-| View franchise<br/>(as franchisee)                  | franchiseDashboard.tsx |  |              |
+| View franchise<br/>(as franchisee)                  | franchiseDashboard.tsx | \[GET\] /api/franchise/:userId | `SELECT objectId FROM userRole WHERE role='franchisee' AND userId=?` |
 | Create a store                                      | createStore.tsx    |                   |              |
 | Close a store                                       | closeStore.tsx     |                   |              |
 | Login as admin<br/>(a@jwt.com, pw: admin)           | login.tsx          | \[PUT\] /api/auth | `SELECT * FROM user WHERE email=?` <br/> `SELECT * FROM userRole WHERE userId=?` |
