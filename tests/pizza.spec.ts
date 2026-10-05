@@ -31,7 +31,9 @@ test('home page', async ({ page }) => {
 
 async function basicInit(page: Page) {
   let loggedInUser: User | undefined;
-  const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] } };
+  const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] },
+    'a@jwt.com': { id: '1', name: 'Admin User', email: 'a@jwt.com', password: 'admin', roles: [{ role: Role.Admin }] },
+  };
 
   await page.route('*/**/api/auth', async (route) => {
     const loginReq = route.request().postDataJSON();
@@ -129,4 +131,84 @@ test('purchase with login', async ({ page }) => {
   await page.getByRole('button', { name: 'Pay now' }).click();
 
   await expect(page.getByText('0.008')).toBeVisible();
+});
+
+test('register', async ({ page }) => {
+  await basicInit(page);
+  await page.route('*/**/api/auth', async (route) => {
+    expect(route.request().method()).toBe('POST');
+    expect(route.request().postDataJSON()).toMatchObject({ name: 'Pat Doe', email: 'p@jwt.com', password: 'b' });
+    await route.fulfill({ json: { user: { id: 9, name: 'Pat Doe', email: 'p@jwt.com', roles: [{ role: 'diner' }] }, token: 'abcdef' } });
+  });
+
+  await page.getByRole('link', { name: 'Register' }).click();
+  await page.getByPlaceholder('Full name').fill('Pat Doe');
+  await page.getByPlaceholder('Email address').fill('p@jwt.com');
+  await page.getByPlaceholder('Password').fill('b');
+  await page.getByRole('button', { name: 'Register' }).click();
+
+  await expect(page.getByRole('link', { name: 'PD' })).toBeVisible();
+});
+
+async function loginAs(page: Page, email: string, password: string) {
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByPlaceholder('Email address').fill(email);
+  await page.getByPlaceholder('Password').fill(password);
+  await page.getByRole('button', { name: 'Login' }).click();
+}
+
+test('logout', async ({ page }) => {
+  await basicInit(page);
+  await loginAs(page, 'd@jwt.com', 'a');
+  await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
+
+  await page.route('*/**/api/auth', async (route) => {
+    expect(route.request().method()).toBe('DELETE');
+    await route.fulfill({ json: { message: 'logout successful' } });
+  });
+  await page.getByRole('link', { name: 'Logout' }).click();
+
+  await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
+});
+
+test('diner dashboard', async ({ page }) => {
+  await basicInit(page);
+  await page.route('*/**/api/order', async (route) => {
+    await route.fulfill({ json: { dinerId: 3, orders: [] } });
+  });
+  await loginAs(page, 'd@jwt.com', 'a');
+
+  await page.getByRole('link', { name: 'KC' }).click();
+
+  await expect(page.getByRole('main')).toContainText('Kai Chen');
+  await expect(page.getByRole('main')).toContainText('d@jwt.com');
+  await expect(page.getByRole('main')).toContainText('How have you lived this long without having a pizza?');
+});
+
+test('admin dashboard', async ({ page }) => {
+  await basicInit(page);
+  await page.route(/\/api\/franchise\?/, async (route) => {
+    const filtered = route.request().url().includes('name=*Lota*');
+    const franchises = [
+      { id: 2, name: 'LotaPizza', admins: [{ name: 'Fran Chisee' }], stores: [{ id: 4, name: 'Lehi', totalRevenue: 1.5 }] },
+      { id: 3, name: 'PizzaCorp', admins: [{ name: 'Corp Owner' }], stores: [] },
+    ];
+    await route.fulfill({ json: { franchises: filtered ? franchises.slice(0, 1) : franchises, more: false } });
+  });
+  await loginAs(page, 'a@jwt.com', 'admin');
+
+  await page.getByRole('link', { name: 'Admin' }).click();
+  await expect(page.getByRole('main')).toContainText("Mama Ricci's kitchen");
+  await expect(page.getByRole('main')).toContainText('LotaPizza');
+  await expect(page.getByRole('main')).toContainText('Fran Chisee');
+  await expect(page.getByRole('main')).toContainText('Lehi');
+  await expect(page.getByRole('main')).toContainText('1.5 ₿');
+  await expect(page.getByRole('main')).toContainText('PizzaCorp');
+
+  await page.getByPlaceholder('Filter franchises').fill('Lota');
+  await page.getByRole('button', { name: 'Submit' }).click();
+  await expect(page.getByRole('main')).not.toContainText('PizzaCorp');
+
+  await page.getByRole('button', { name: 'Close' }).first().click();
+  await expect(page.getByRole('main')).toContainText('Sorry to see you go');
 });
