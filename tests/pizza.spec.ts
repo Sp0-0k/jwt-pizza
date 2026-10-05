@@ -186,7 +186,7 @@ test('diner dashboard', async ({ page }) => {
   await expect(page.getByRole('main')).toContainText('How have you lived this long without having a pizza?');
 });
 
-test('admin dashboard', async ({ page }) => {
+async function adminInit(page: Page) {
   await basicInit(page);
   await page.route(/\/api\/franchise\?/, async (route) => {
     const filtered = route.request().url().includes('name=*Lota*');
@@ -197,8 +197,12 @@ test('admin dashboard', async ({ page }) => {
     await route.fulfill({ json: { franchises: filtered ? franchises.slice(0, 1) : franchises, more: false } });
   });
   await loginAs(page, 'a@jwt.com', 'admin');
-
   await page.getByRole('link', { name: 'Admin' }).click();
+}
+
+test('admin dashboard', async ({ page }) => {
+  await adminInit(page);
+
   await expect(page.getByRole('main')).toContainText("Mama Ricci's kitchen");
   await expect(page.getByRole('main')).toContainText('LotaPizza');
   await expect(page.getByRole('main')).toContainText('Fran Chisee');
@@ -266,4 +270,35 @@ test('franchisee closes a store', async ({ page }) => {
   await page.getByRole('button', { name: 'Close' }).click();
 
   await expect(page.getByRole('main')).toContainText('Everything you need to run an JWT Pizza franchise');
+});
+
+
+test('admin creates a franchise', async ({ page }) => {
+  await adminInit(page);
+  await page.route(/\/api\/franchise$/, async (route) => {
+    expect(route.request().method()).toBe('POST');
+    expect(route.request().postDataJSON()).toMatchObject({ name: 'NewPizza', admins: [{ email: 'n@jwt.com' }] });
+    await route.fulfill({ json: { id: 9, name: 'NewPizza', admins: [{ email: 'n@jwt.com' }], stores: [] } });
+  });
+
+  await page.getByRole('button', { name: 'Add Franchise' }).click();
+  await page.getByPlaceholder('franchise name').fill('NewPizza');
+  await page.getByPlaceholder('franchisee admin email').fill('n@jwt.com');
+  await page.getByRole('button', { name: 'Create' }).click();
+
+  await expect(page.getByRole('main')).toContainText("Mama Ricci's kitchen");
+});
+
+test('admin closes a franchise', async ({ page }) => {
+  await adminInit(page);
+  await page.route('*/**/api/franchise/2', async (route) => {
+    expect(route.request().method()).toBe('DELETE');
+    await route.fulfill({ json: { message: 'franchise deleted' } });
+  });
+
+  await page.getByRole('button', { name: 'Close' }).first().click();
+  await expect(page.getByRole('main')).toContainText('Are you sure you want to close the LotaPizza franchise?');
+  await page.getByRole('button', { name: 'Close' }).click();
+
+  await expect(page.getByRole('main')).toContainText("Mama Ricci's kitchen");
 });
