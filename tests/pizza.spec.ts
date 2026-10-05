@@ -33,6 +33,7 @@ async function basicInit(page: Page) {
   let loggedInUser: User | undefined;
   const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] },
     'a@jwt.com': { id: '1', name: 'Admin User', email: 'a@jwt.com', password: 'admin', roles: [{ role: Role.Admin }] },
+    'f@jwt.com': { id: '5', name: 'Fran Chisee', email: 'f@jwt.com', password: 'f', roles: [{ role: Role.Franchisee }] },
   };
 
   await page.route('*/**/api/auth', async (route) => {
@@ -211,4 +212,58 @@ test('admin dashboard', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Close' }).first().click();
   await expect(page.getByRole('main')).toContainText('Sorry to see you go');
+});
+
+
+test('franchise page without a franchise', async ({ page }) => {
+  await basicInit(page);
+  await page.route('*/**/api/franchise/3', async (route) => {
+    await route.fulfill({ json: [] });
+  });
+  await loginAs(page, 'd@jwt.com', 'a');
+
+  await page.getByRole('link', { name: 'Franchise' }).first().click();
+
+  await expect(page.getByRole('main')).toContainText('So you want a piece of the pie?');
+});
+
+async function franchiseeInit(page: Page) {
+  await basicInit(page);
+  await page.route('*/**/api/franchise/5', async (route) => {
+    await route.fulfill({ json: [{ id: 2, name: 'LotaPizza', admins: [{ name: 'Fran Chisee' }], stores: [{ id: 4, name: 'Lehi', totalRevenue: 1.5 }] }] });
+  });
+  await loginAs(page, 'f@jwt.com', 'f');
+  await page.getByRole('link', { name: 'Franchise' }).first().click();
+  await expect(page.getByRole('main')).toContainText('LotaPizza');
+  await expect(page.getByRole('main')).toContainText('Lehi');
+  await expect(page.getByRole('main')).toContainText('1.5 ₿');
+}
+
+test('franchisee creates a store', async ({ page }) => {
+  await franchiseeInit(page);
+  await page.route('*/**/api/franchise/2/store', async (route) => {
+    expect(route.request().method()).toBe('POST');
+    expect(route.request().postDataJSON()).toMatchObject({ name: 'Provo' });
+    await route.fulfill({ json: { id: 8, name: 'Provo' } });
+  });
+
+  await page.getByRole('button', { name: 'Create store' }).click();
+  await page.getByPlaceholder('store name').fill('Provo');
+  await page.getByRole('button', { name: 'Create' }).click();
+
+  await expect(page.getByRole('main')).toContainText('Everything you need to run an JWT Pizza franchise');
+});
+
+test('franchisee closes a store', async ({ page }) => {
+  await franchiseeInit(page);
+  await page.route('*/**/api/franchise/2/store/4', async (route) => {
+    expect(route.request().method()).toBe('DELETE');
+    await route.fulfill({ json: { message: 'store deleted' } });
+  });
+
+  await page.getByRole('button', { name: 'Close' }).click();
+  await expect(page.getByRole('main')).toContainText('Are you sure you want to close the LotaPizza store Lehi');
+  await page.getByRole('button', { name: 'Close' }).click();
+
+  await expect(page.getByRole('main')).toContainText('Everything you need to run an JWT Pizza franchise');
 });
