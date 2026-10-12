@@ -196,6 +196,9 @@ async function adminInit(page: Page) {
     ];
     await route.fulfill({ json: { franchises: filtered ? franchises.slice(0, 1) : franchises, more: false } });
   });
+  await page.route(/\/api\/user\?/, async (route) => {
+    await route.fulfill({ json: { users: [{ id: 3, name: 'Dee Diner', email: 'd@jwt.com', roles: [{ role: Role.Diner }] }], more: false } });
+  });
   await loginAs(page, 'a@jwt.com', 'admin');
   await page.getByRole('link', { name: 'Admin' }).click();
 }
@@ -211,7 +214,7 @@ test('admin dashboard', async ({ page }) => {
   await expect(page.getByRole('main')).toContainText('PizzaCorp');
 
   await page.getByPlaceholder('Filter franchises').fill('Lota');
-  await page.getByRole('button', { name: 'Submit' }).click();
+  await page.getByRole('row').filter({ has: page.getByPlaceholder('Filter franchises') }).getByRole('button', { name: 'Submit' }).click();
   await expect(page.getByRole('main')).not.toContainText('PizzaCorp');
 
   await page.getByRole('button', { name: 'Close' }).first().click();

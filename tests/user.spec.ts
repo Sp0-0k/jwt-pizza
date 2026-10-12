@@ -1,4 +1,5 @@
 import { test, expect } from 'playwright-test-coverage';
+import type { Page } from '@playwright/test';
 
 // Several tests log in as the shared default admin, and the service only tracks one session per user.
 test.describe.configure({ mode: 'serial' });
@@ -176,4 +177,120 @@ test('updateUserAsFranchisee', async ({ page }) => {
 
   await expect(page.getByRole('main')).toContainText('pizza franchiseex');
   await expect(page.getByRole('main')).toContainText('franchisee');
+});
+
+async function registerDiner(page: Page, name: string, email: string) {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Register' }).click();
+  await page.getByRole('textbox', { name: 'Full name' }).fill(name);
+  await page.getByRole('textbox', { name: 'Email address' }).fill(email);
+  await page.getByRole('textbox', { name: 'Password' }).fill('diner');
+  await page.getByRole('button', { name: 'Register' }).click();
+  await page.getByRole('link', { name: 'Logout' }).click();
+}
+
+async function loginAsAdminAndFilterUsers(page: Page, filter: string) {
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
+  await page.getByRole('textbox', { name: 'Password' }).fill('admin');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.getByRole('link', { name: 'Admin' }).click();
+
+  await page.getByPlaceholder('Filter users').fill(filter);
+  await page.getByRole('row').filter({ has: page.getByPlaceholder('Filter users') }).getByRole('button', { name: 'Submit' }).click();
+}
+
+// Removes a test user through the admin UI so the shared database does not fill up with fixtures.
+// Expects to be logged in as the admin, on the admin dashboard.
+async function deleteUserAsAdmin(page: Page, nameFilter: string, email: string) {
+  await page.getByPlaceholder('Filter users').fill(nameFilter);
+  await page.getByRole('row').filter({ has: page.getByPlaceholder('Filter users') }).getByRole('button', { name: 'Submit' }).click();
+  await page.getByRole('row').filter({ hasText: email }).getByRole('button', { name: 'Delete' }).click();
+  await expect(page.locator('#hs-delete-user-modal')).toHaveClass(/opened/);
+  await page.getByRole('dialog').getByRole('button', { name: 'Confirm' }).click();
+  await expect(page.getByRole('row').filter({ hasText: email })).toHaveCount(0);
+  await expect(page.getByRole('dialog')).toBeHidden();
+}
+
+// These tests register, log in and list users against the real service, which takes longer than the default.
+test.describe('admin user management', () => {
+  test.describe.configure({ timeout: 20000 });
+
+  test('adminListsUsers', async ({ page }) => {
+    const id = Math.floor(Math.random() * 100000);
+    const email = `list${id}@jwt.com`;
+    await registerDiner(page, `listed diner ${id}`, email);
+
+    await loginAsAdminAndFilterUsers(page, `listed diner ${id}`);
+    try {
+      const row = page.getByRole('row').filter({ hasText: email });
+      await expect(row).toHaveCount(1);
+      await expect(row).toContainText(`listed diner ${id}`);
+      await expect(row).toContainText('diner');
+    } finally {
+      await deleteUserAsAdmin(page, `listed diner ${id}`, email);
+    }
+    await page.getByRole('link', { name: 'Logout' }).click();
+  });
+
+  test('adminFiltersUsersByName', async ({ page }) => {
+    const id = Math.floor(Math.random() * 100000);
+    await registerDiner(page, `findme ${id}`, `findme${id}@jwt.com`);
+    await registerDiner(page, `skipme ${id}`, `skipme${id}@jwt.com`);
+
+    await loginAsAdminAndFilterUsers(page, `findme ${id}`);
+    try {
+      await expect(page.getByRole('row').filter({ hasText: `findme${id}@jwt.com` })).toHaveCount(1);
+      await expect(page.getByRole('row').filter({ hasText: `skipme${id}@jwt.com` })).toHaveCount(0);
+    } finally {
+      await deleteUserAsAdmin(page, `findme ${id}`, `findme${id}@jwt.com`);
+      await deleteUserAsAdmin(page, `skipme ${id}`, `skipme${id}@jwt.com`);
+    }
+    await page.getByRole('link', { name: 'Logout' }).click();
+  });
+
+  test('adminDeletesUserAfterConfirming', async ({ page }) => {
+    const id = Math.floor(Math.random() * 100000);
+    const email = `doomed${id}@jwt.com`;
+    await registerDiner(page, `doomed ${id}`, email);
+
+    await loginAsAdminAndFilterUsers(page, `doomed ${id}`);
+    const row = page.getByRole('row').filter({ hasText: email });
+    await row.getByRole('button', { name: 'Delete' }).click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toContainText('Delete user');
+    await expect(dialog).toContainText(email);
+    await dialog.getByRole('button', { name: 'Confirm' }).click();
+
+    await expect(page.getByRole('row').filter({ hasText: email })).toHaveCount(0);
+    await page.getByRole('link', { name: 'Logout' }).click();
+
+    // the deleted user can no longer log in
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page.getByRole('textbox', { name: 'Email address' }).fill(email);
+    await page.getByRole('textbox', { name: 'Password' }).fill('diner');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'Logout' })).toHaveCount(0);
+  });
+
+  test('adminCancelsUserDeletion', async ({ page }) => {
+    const id = Math.floor(Math.random() * 100000);
+    const email = `spared${id}@jwt.com`;
+    await registerDiner(page, `spared ${id}`, email);
+
+    await loginAsAdminAndFilterUsers(page, `spared ${id}`);
+    try {
+      await page.getByRole('row').filter({ hasText: email }).getByRole('button', { name: 'Delete' }).click();
+      // preline ignores a close that arrives before the open transition has finished
+      await expect(page.locator('#hs-delete-user-modal')).toHaveClass(/opened/);
+      await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
+      await expect(page.getByRole('dialog')).toBeHidden();
+
+      await expect(page.getByRole('row').filter({ hasText: email })).toHaveCount(1);
+    } finally {
+      await deleteUserAsAdmin(page, `spared ${id}`, email);
+    }
+    await page.getByRole('link', { name: 'Logout' }).click();
+  });
 });
