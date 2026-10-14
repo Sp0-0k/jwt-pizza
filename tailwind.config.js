@@ -86,6 +86,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter var', ...defaultTheme.fontFamily.sans],
+        // Free stand-in for Papa Johns' proprietary condensed display face ("Papa Sans")
+        display: ['Anton', 'Impact', ...defaultTheme.fontFamily.sans],
       },
     },
   },
