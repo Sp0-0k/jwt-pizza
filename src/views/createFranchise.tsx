@@ -21,7 +21,7 @@ export default function CreateFranchise() {
     <View title="Create franchise">
       <div className="text-start py-8 px-4 sm:px-6 lg:px-8">
         <form onSubmit={createFranchise}>
-          <div className="text-neutral-100">Want to create franchise?</div>
+          <div className="text-neutral-800">Want to create franchise?</div>
           <div className="max-w-sm space-y-3 py-4  flex-1">
             <div className="relative">
               <input

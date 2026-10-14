@@ -40,7 +40,7 @@ export default function Menu() {
   return (
     <View title="Awesome is a click away">
       <form onSubmit={checkout}>
-        <div className="flow flow-col text-center justify-center text-neutral-100  py-8 px-4 sm:px-6 lg:px-8">
+        <div className="flow flow-col text-center justify-center text-neutral-800  py-8 px-4 sm:px-6 lg:px-8">
           <div className="my-2 sm:my-4">Pick your store and pizzas from below. Remember to order extra for a midnight party.</div>
 
           <div className="text-neutral-800 py-3">
@@ -54,7 +54,7 @@ export default function Menu() {
             </select>
           </div>
 
-          <div className="text-yellow-200">{order.items.length > 0 ? 'Selected pizzas: ' + order.items.length : 'What are you waiting for? Pick a store and then add some pizzas!'}</div>
+          <div className="text-red-500">{order.items.length > 0 ? 'Selected pizzas: ' + order.items.length : 'What are you waiting for? Pick a store and then add some pizzas!'}</div>
           <Button title="Checkout" submit disabled={!selectedStore || order.items.length <= 0} className="disabled:bg-neutral-500 disabled:text-neutral-700" onPress={() => {}} />
 
           <div className="m-4 grid gap-x-8 gap-y-4 sm:gird-cols-1 md:grid-cols-2 lg:grid-cols-4 xlg:grid-cols-5">

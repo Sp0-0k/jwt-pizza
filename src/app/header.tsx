@@ -20,11 +20,11 @@ export default function Header(props: Props) {
 
   return (
     <div className="space-y-4">
-      <header className="flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-gray-800 text-sm py-4">
+      <header className="flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-white shadow-md text-sm py-4">
         <nav className="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global">
           <div className="flex items-center justify-between">
             <img className="w-10 m-3" src="/jwt-pizza-icon.png" />
-            <span className="font-normal flex-none text-4xl bg-clip-text bg-gradient-to-tr from-yellow-100 to-yellow-200 text-transparent">JWT Pizza</span>
+            <span className="font-normal flex-none text-4xl bg-clip-text bg-gradient-to-tr from-orange-800 to-orange-600 text-transparent">JWT Pizza</span>
             <div className="sm:hidden">
               <button
                 type="button"
@@ -42,7 +42,7 @@ export default function Header(props: Props) {
                 return (
                   item.display.includes('nav') &&
                   (!item.constraints || validateConstraints(item.constraints)) && (
-                    <NavLink key={item.title} className="font-medium text-gray-400  focus:text-orange-600" to={item.to.replace(':subPath?/', '')}>
+                    <NavLink key={item.title} className="font-medium text-neutral-800 hover:text-orange-600 focus:text-orange-600" to={item.to.replace(':subPath?/', '')}>
                       {item.title}
                     </NavLink>
                   )
@@ -51,7 +51,7 @@ export default function Header(props: Props) {
             </div>
           </div>
           {props.user && (
-            <NavLink className="font-medium text-gray-400  focus:text-orange-600" to="diner-dashboard">
+            <NavLink className="font-medium text-neutral-800 hover:text-orange-600 focus:text-orange-600" to="diner-dashboard">
               <div className="hs-tooltip inline-block  [--placement:bottom]">
                 <div className="hs-tooltip-toggle pl-4 font-semibold text-orange-400">
                   <span className="inline-flex items-center justify-center size-[30px] rounded-full bg-orange-800 font-semibold text-white leading-none">

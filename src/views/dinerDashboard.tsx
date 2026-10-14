@@ -61,7 +61,7 @@ async function updateUser() {
           <Button title="Edit" className="w-16 p-0" onPress={() => HSOverlay.open(document.getElementById('hs-jwt-modal')!)} />
         </div>
 
-        <div className="my-4 text-lg text-orange-200 text-start grid grid-cols-5 gap-2">
+        <div className="my-4 text-lg text-neutral-700 text-start grid grid-cols-5 gap-2">
           <div className="font-semibold text-orange-400">name:</div> <div className="col-span-4">{user.name}</div>
           <div className="font-semibold text-orange-400">email:</div> <div className="col-span-4">{user.email}</div>
           <div className="font-semibold text-orange-400">role:</div>{' '}
@@ -76,7 +76,7 @@ async function updateUser() {
         </div>
 
         {orders?.length === 0 && (
-          <div className="text-neutral-100">
+          <div className="text-neutral-800">
             How have you lived this long without having a pizza?{' '}
             <Link className="text-orange-400 underline font-semibold" to="/menu">
               Buy one
@@ -86,7 +86,7 @@ async function updateUser() {
         )}
         {orders?.length > 0 && (
           <>
-            <div className="text-neutral-100">Here is your history of all the good times.</div>
+            <div className="text-neutral-800">Here is your history of all the good times.</div>
             <div className="bg-neutral-100 overflow-clip my-4">
               <div className="flex flex-col">
                 <div className="-m-1.5 overflow-x-auto">

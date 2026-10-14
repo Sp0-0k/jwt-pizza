@@ -89,7 +89,7 @@ export default function App() {
   ];
 
   return (
-    <div className="bg-gray-800">
+    <div className="bg-neutral-50">
       <Header user={user} navItems={navItems} />
       <Breadcrumb location={location.pathname.replace('/', '')} />
 
