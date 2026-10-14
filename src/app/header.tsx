@@ -24,7 +24,7 @@ export default function Header(props: Props) {
         <nav className="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global">
           <div className="flex items-center justify-between">
             <img className="w-10 m-3" src="/jwt-pizza-icon.png" />
-            <span className="font-display uppercase tracking-wide font-normal flex-none text-4xl bg-clip-text bg-gradient-to-tr from-orange-800 to-orange-600 text-transparent">JWT Pizza</span>
+            <span className="font-display uppercase tracking-wide font-normal flex-none text-4xl text-red-500">JWT Pizza</span>
             <div className="sm:hidden">
               <button
                 type="button"
