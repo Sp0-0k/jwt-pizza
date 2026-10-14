@@ -6,25 +6,56 @@ module.exports = {
     extend: {
       colors: {
         // Papa Johns palette (approximated; Papa Johns publishes no official hex codes).
-        // "orange" is the app's primary brand color, so it maps to Papa Johns "fresh basil" green.
+        // "orange" is the app's primary accent/CTA color, so it maps to Papa Johns "tangy tomato" red.
         orange: {
-          50: '#EEF6F1',
-          100: '#D6EBDF',
-          200: '#B0D8C2',
-          300: '#7FC09C',
-          400: '#4DA678',
-          500: '#228B5B',
-          600: '#0E7A4A',
-          700: '#00693F',
-          800: '#005C37',
-          900: '#003D25',
+          50: '#FDECEC',
+          100: '#FAD3D4',
+          200: '#F5ABAD',
+          300: '#EE7A7E',
+          400: '#E8545A',
+          500: '#E1262F',
+          600: '#D52B1E',
+          700: '#B71C22',
+          800: '#C8102E',
+          900: '#7F0F1C',
         },
-        // "tangy tomato" red
         red: {
           500: '#E1262F',
           800: '#A91B22',
         },
-        // "pepperoncini" yellow-green and "fluffy dough" off-white tones
+        // "fresh basil" greens replace the blue-grey slate surfaces
+        slate: {
+          50: '#F7F5EC',
+          100: '#F1EEDF', // "fluffy dough" off-white
+          200: '#E4E0CB',
+          300: '#C9D6CD',
+          400: '#2F8F68',
+          500: '#0B7A4F',
+          600: '#006C45', // page background
+          700: '#005A3A',
+          800: '#00432B',
+          900: '#002E1D',
+        },
+        // neutral greys swap blue tint for warm greys; dark ends become deep basil green
+        gray: {
+          50: '#F8F7F2',
+          100: '#F1EFE6',
+          200: '#E2DFD3',
+          300: '#CFCCBF',
+          400: '#B4B9AF',
+          500: '#6F7A72',
+          600: '#4B5750',
+          700: '#00432B',
+          800: '#003B26', // header / app background
+          900: '#002A1B',
+        },
+        // remaining blue accents (focus rings, links, carousel dots) become basil green
+        blue: {
+          500: '#0B7A4F',
+          600: '#006C45',
+          700: '#00593A',
+        },
+        // "pepperoncini" yellow-green
         yellow: {
           50: '#FBF9EE',
           100: '#F4F1DC',

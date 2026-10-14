@@ -107,7 +107,7 @@ function whyFranchise() {
 
         <div>
           <OrderNow />
-          <p className="py-2 text-neutral-100 text-start mx-4 pb-4 first-line:uppercase first-line:tracking-widest  first-letter:text-7xl first-letter:font-bold first-letter:text-orange-800  first-letter:mr-3 first-letter:float-left">
+          <p className="py-2 text-neutral-100 text-start mx-4 pb-4 first-line:uppercase first-line:tracking-widest  first-letter:text-7xl first-letter:font-bold first-letter:text-yellow-200  first-letter:mr-3 first-letter:float-left">
             Now is the time to get in on the JWT Pizza tsunami. The pizza sells itself. People cannot get enough. Setup your shop and let the pizza
             fly. Here are all the reasons why you should buy a franchise with JWT Pizza.
           </p>
@@ -170,7 +170,7 @@ function whyFranchise() {
           </div>
           <div className="py-4">
             <h2 className="py-2 text-2xl sm:text-4xl font-thin text-orange-600">Unleash Your Potential</h2>
-            <p className="py-2 text-neutral-100 text-start mx-4 pb-4 first-line:uppercase first-line:tracking-widest  first-letter:text-7xl first-letter:font-bold first-letter:text-orange-800  first-letter:mr-3 first-letter:float-left">
+            <p className="py-2 text-neutral-100 text-start mx-4 pb-4 first-line:uppercase first-line:tracking-widest  first-letter:text-7xl first-letter:font-bold first-letter:text-yellow-200  first-letter:mr-3 first-letter:float-left">
               Are you ready to embark on a journey towards unimaginable wealth? Owning a franchise with JWT Pizza is your ticket to financial success.
               With our proven business model and strong brand recognition, you have the opportunity to generate substantial revenue. Imagine the
               thrill of watching your profits soar year after year, as customers flock to your JWT Pizza, craving our mouthwatering creations.
