@@ -20,6 +20,8 @@ test('updateUser', async ({ page }) => {
   await page.getByRole('button', { name: 'Edit' }).click();
   await expect(page.locator('h3')).toContainText('Edit user');
   await page.getByRole('textbox').first().fill('pizza dinerx');
+  // preline ignores a close that arrives before the open transition has finished
+  await expect(page.locator('#hs-jwt-modal')).toHaveClass(/opened/);
   await page.getByRole('button', { name: 'Update' }).click();
 
   await page.waitForSelector('[role="dialog"].hidden', { state: 'attached' });
@@ -51,6 +53,8 @@ test('updatePassword', async ({ page }) => {
   await page.getByRole('button', { name: 'Edit' }).click();
   await expect(page.locator('h3')).toContainText('Edit user');
   await page.locator('#password').fill('newpassword');
+  // preline ignores a close that arrives before the open transition has finished
+  await expect(page.locator('#hs-jwt-modal')).toHaveClass(/opened/);
   await page.getByRole('button', { name: 'Update' }).click();
 
   await page.waitForSelector('[role="dialog"].hidden', { state: 'attached' });
@@ -82,6 +86,8 @@ test('updateEmail', async ({ page }) => {
   await page.getByRole('button', { name: 'Edit' }).click();
   await expect(page.locator('h3')).toContainText('Edit user');
   await page.getByRole('textbox').nth(1).fill(newEmail);
+  // preline ignores a close that arrives before the open transition has finished
+  await expect(page.locator('#hs-jwt-modal')).toHaveClass(/opened/);
   await page.getByRole('button', { name: 'Update' }).click();
 
   await page.waitForSelector('[role="dialog"].hidden', { state: 'attached' });
@@ -112,6 +118,8 @@ test('updateUserAsAdmin', async ({ page }) => {
   await page.getByRole('button', { name: 'Edit' }).click();
   await expect(page.locator('h3')).toContainText('Edit user');
   await page.getByRole('textbox').first().fill('常用名字x');
+  // preline ignores a close that arrives before the open transition has finished
+  await expect(page.locator('#hs-jwt-modal')).toHaveClass(/opened/);
   await page.getByRole('button', { name: 'Update' }).click();
 
   await page.waitForSelector('[role="dialog"].hidden', { state: 'attached' });
@@ -122,6 +130,8 @@ test('updateUserAsAdmin', async ({ page }) => {
   // restore the shared default admin
   await page.getByRole('button', { name: 'Edit' }).click();
   await page.getByRole('textbox').first().fill('常用名字');
+  // preline ignores a close that arrives before the open transition has finished
+  await expect(page.locator('#hs-jwt-modal')).toHaveClass(/opened/);
   await page.getByRole('button', { name: 'Update' }).click();
   await page.waitForSelector('[role="dialog"].hidden', { state: 'attached' });
 
@@ -161,6 +171,8 @@ test('updateUserAsFranchisee', async ({ page }) => {
   await page.getByRole('button', { name: 'Edit' }).click();
   await expect(page.locator('h3')).toContainText('Edit user');
   await page.getByRole('textbox').first().fill('pizza franchiseex');
+  // preline ignores a close that arrives before the open transition has finished
+  await expect(page.locator('#hs-jwt-modal')).toHaveClass(/opened/);
   await page.getByRole('button', { name: 'Update' }).click();
 
   await page.waitForSelector('[role="dialog"].hidden', { state: 'attached' });
@@ -261,9 +273,12 @@ test.describe('admin user management', () => {
     const dialog = page.getByRole('dialog');
     await expect(dialog).toContainText('Delete user');
     await expect(dialog).toContainText(email);
+    // preline ignores a close that arrives before the open transition has finished
+    await expect(page.locator('#hs-delete-user-modal')).toHaveClass(/opened/);
     await dialog.getByRole('button', { name: 'Confirm' }).click();
 
     await expect(page.getByRole('row').filter({ hasText: email })).toHaveCount(0);
+    await expect(dialog).toBeHidden();
     await page.getByRole('link', { name: 'Logout' }).click();
 
     // the deleted user can no longer log in
